@@ -1,0 +1,48 @@
+[project]
+name = "neurocorrelator"
+version = "0.1.0"
+description = ""
+authors = [{name = "Kervinen Matvey", email = "kervinen.ms@phystech.edu"}]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "seaborn (>=0.13.2,<0.14.0)",
+    "opencv-python-headless (>=4.11.0.86,<5.0.0.0)",
+    "scikit-learn (>=1.6.1,<2.0.0)",
+    "pathlib (>=1.0.1,<2.0.0)",
+    "torchvision (>=0.22.0,<0.23.0)",
+    "fire (>=0.7.0,<0.8.0)",
+    "lightning (>=2.5.1.post0,<3.0.0)",
+    "pytorch-metric-learning (>=2.8.1,<3.0.0)",
+    "mlflow (>=2.22.1,<3.0.0)",
+    "hydra-core (>=1.3.2,<2.0.0)",
+    "dvc (>=3.60.0,<4.0.0)",
+    "dvc-gdrive (>=3.0.1,<4.0.0)"
+]
+
+[tool.poetry]
+packages = [{include = "neurocorrelator", from = "src"}]
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"
+line_length = 120
+
+[tool.poetry.group.dev.dependencies]
+black = "^25.1.0"
+isort = "^6.0.1"
+ipykernel = "^6.29.5"
+jupyter = "^1.1.1"
+pre-commit = "^4.2.0"
+flake8 = "^7.2.0"
+prettier = "^0.0.7"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.flake8]
+max-line-length = 120
+extend-ignore = "E203, W503, E731, E501, F403"
