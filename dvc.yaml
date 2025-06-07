@@ -1,0 +1,15 @@
+# dvc.yaml
+stages:
+  download_data:
+    cmd: python scripts/download_data.py +data=dataset
+    deps:
+      - scripts/download).py
+      - configs/data/dataset.yaml  # Зависимость от конфига
+    outs:
+      - ${dataset.extract.path}:
+          persist: true
+    params:
+      - dataset.download.url
+      - dataset.download.zip_path
+      - dataset.extract.path
+      - dataset.extract.remove_zip

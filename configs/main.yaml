@@ -1,0 +1,6 @@
+defaults:
+  - data: dataset
+  - model: vgg
+  - train: params
+  - logging: mlflow
+  - _self_

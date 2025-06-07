@@ -6,12 +6,13 @@ from src.neurocorrelator.qatm_pytorch import run_pipeline
 
 
 def main(
-    cuda: bool = False,
-    sample_image: str = "neurocorrelator/samples/image.png",
-    template_images_dir: str = "neurocorrelator/templates/",
-    result_images_dir: str = "neurocorrelator/result/",
+    cuda: bool = True,
+    sample_image: str = "samples/image.png",
+    template_images_dir: str = "templates/",
+    result_images_dir: str = "result/",
     alpha: float = 25,
     thresh_csv: str = "thresh_template.csv",
+    use_trained: bool = True,
 ):
     """
     QATM Pytorch Inference
@@ -24,8 +25,8 @@ def main(
         alpha: Параметр alpha (по умолчанию: 25)
         thresh_csv: CSV-файл с порогами (по умолчанию: "thresh_template.csv")
     """
-    sample_path = Path(sample_image).resolve()
-    template_path = Path(template_images_dir).resolve()
+    sample_path = Path.cwd() / sample_image
+    template_path = Path.cwd() / template_images_dir
 
     result_path = Path(result_images_dir).resolve()
     result_path.mkdir(parents=True, exist_ok=True)
@@ -38,6 +39,7 @@ def main(
         result_dir=result_path,
         alpha=alpha,
         use_cuda=cuda,
+        use_trained=use_trained,
         threshold_csv=thresh_csv_path,
     )
 

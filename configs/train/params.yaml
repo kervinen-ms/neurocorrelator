@@ -1,0 +1,5 @@
+params:
+  batch_size : 64
+  lr : 0.001
+  n_workers :  8
+  n_epochs : 1

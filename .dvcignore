@@ -1,0 +1,5 @@
+# Add patterns of files dvc should ignore, which could improve
+# the performance. Learn more at
+# https://dvc.org/doc/user-guide/dvcignore
+neurocorrelator/client_secret_1021463937122_v711ll5aah5advoevq80rgvlhtlt1len_apps.json
+neurocorrelator/mlops-project-462211-9219712b8519.json

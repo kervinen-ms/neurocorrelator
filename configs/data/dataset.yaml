@@ -1,0 +1,11 @@
+dataset:
+  path: data/
+  views:
+    - "satellite"
+    - "street"
+    - "drone"
+    - "google"
+  image_size:
+    - 224
+    - 224
+  padding_size : 1

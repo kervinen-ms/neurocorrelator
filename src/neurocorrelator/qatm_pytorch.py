@@ -11,7 +11,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from seaborn import color_palette
-from torchvision import models, transforms
+from torchvision import transforms
+
+from neurocorrelator.featex import VGGFeatureExtractor
 
 from .utils import *
 
@@ -88,49 +90,55 @@ class ImageDataset(torch.utils.data.Dataset):
         }
 
 
-class FeatureExtractor(nn.Module):
-    """Feature extractor for VGG19 with hook-based feature capture"""
+# class FeatureExtractor(nn.Module):
+#     """Feature extractor for VGG19 with hook-based feature capture"""
 
-    def __init__(self, base_model: nn.Module, use_cuda: bool = False):
-        super().__init__()
-        self.use_cuda = use_cuda
-        self.model = self._create_feature_extractor(base_model)
-        self.feature1: torch.Tensor = None
-        self.feature2: torch.Tensor = None
+#     def __init__(self, base_model: nn.Module, use_cuda: bool = False):
+#         super().__init__()
+#         self.use_cuda = use_cuda
+#         self.model = self._create_feature_extractor(base_model)
+#         self.feature1: torch.Tensor = None
+#         self.feature2: torch.Tensor = None
 
-        if use_cuda:
-            self.model.cuda()
+#         if use_cuda:
+#             self.model.cuda()
 
-    def _create_feature_extractor(self, model: nn.Module) -> nn.Module:
-        """Truncate model and register hooks"""
-        model = model[:17]
-        for param in model.parameters():
-            param.requires_grad = False
+#     def _create_feature_extractor(self, model: nn.Module) -> nn.Module:
+#         """Truncate model and register hooks"""
+#         model = model[:17]
+#         for param in model.parameters():
+#             param.requires_grad = False
 
-        model[2].register_forward_hook(self._save_feature1)
-        model[16].register_forward_hook(self._save_feature2)
-        return model.eval()
+#         model[2].register_forward_hook(self._save_feature1)
+#         model[16].register_forward_hook(self._save_feature2)
+#         return model.eval()
 
-    def _save_feature1(self, module, input, output):
-        self.feature1 = output.detach()
+#     def _save_feature1(self, module, input, output):
+#         self.feature1 = output.detach()
 
-    def _save_feature2(self, module, input, output):
-        self.feature2 = output.detach()
+#     def _save_feature2(self, module, input, output):
+#         self.feature2 = output.detach()
 
-    def forward(self, x: torch.Tensor, mode: str = "big") -> torch.Tensor:
-        if self.use_cuda:
-            x = x.cuda()
+#     def forward(self, x: torch.Tensor, mode: str = "big") -> torch.Tensor:
+#         if self.use_cuda:
+#             x = x.cuda()
 
-        self.model(x)
+#         self.model(x)
 
-        if mode == "big":
-            target_size = (self.feature2.shape[2], self.feature2.shape[3])
-            feature = F.interpolate(self.feature1, size=target_size, mode="bilinear", align_corners=True)
-        else:
-            target_size = (self.feature1.shape[2], self.feature1.shape[3])
-            feature = F.interpolate(self.feature2, size=target_size, mode="bilinear", align_corners=True)
+#         if mode == "big":
+#             target_size = (self.feature2.shape[2], self.feature2.shape[3])
+#             feature = F.interpolate(
+#                 self.feature1, size=target_size, mode="bilinear", align_corners=True
+#             )
+#         else:
+#             target_size = (self.feature1.shape[2], self.feature1.shape[3])
+#             feature = F.interpolate(
+#                 self.feature2, size=target_size, mode="bilinear", align_corners=True
+#             )
 
-        return torch.cat((feature, self.feature2 if mode == "big" else self.feature1), dim=1)
+#         return torch.cat(
+#             (feature, self.feature2 if mode == "big" else self.feature1), dim=1
+#         )
 
 
 class FeatureNormalizer:
@@ -155,10 +163,12 @@ class FeatureNormalizer:
 class QATMModel(nn.Module):
     """QATM Model for template matching"""
 
-    def __init__(self, alpha: float, base_model: nn.Module, use_cuda: bool = False):
+    def __init__(self, alpha: float, use_trained=False, use_cuda: bool = False):
         super().__init__()
         self.alpha = alpha
-        self.featex = FeatureExtractor(base_model, use_cuda)
+        self.featex = VGGFeatureExtractor()
+        if use_trained:
+            self.featex.load_state_dict(torch.load("model"))
         self.normalize = FeatureNormalizer()
         self.qatm = QATM(alpha)
         self.cached_features: Dict[Path, torch.Tensor] = {}
@@ -454,8 +464,9 @@ def run_pipeline(
     image_path: Path,
     result_dir: Path,
     alpha: float = 25,
-    use_cuda: bool = False,
+    use_cuda: bool = True,
     threshold_csv: Optional[Path] = None,
+    use_trained=False,
 ):
     """Full QATM pipeline from input to result visualization"""
 
@@ -463,8 +474,7 @@ def run_pipeline(
     dataset = ImageDataset(template_dir, image_path, threshold_csv)
 
     # Create and run model
-    base_model = models.vgg19(weights=models.VGG19_Weights.DEFAULT).features
-    model = QATMModel(alpha, base_model, use_cuda)
+    model = QATMModel(alpha, use_cuda=use_cuda, use_trained=use_trained)
 
     scores, widths, heights, thresholds, heatmap = process_dataset(model, dataset)
     boxes, indices, confidences = nms_multi(scores, widths, heights, thresholds)
