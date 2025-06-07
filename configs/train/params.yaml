@@ -2,4 +2,4 @@ params:
     batch_size: 32
     lr: 0.00001
     n_workers: 8
-    n_epochs: 100
+    n_epochs: 2000

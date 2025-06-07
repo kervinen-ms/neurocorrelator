@@ -31,5 +31,5 @@ repos:
       rev: v3.0.3
       hooks:
           - id: prettier
-            types: ['yaml', 'toml', 'json']
-            args: ['--write', '--check']
+            types: ['file']
+            args: ['--write']
