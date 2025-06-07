@@ -200,7 +200,7 @@ notebooks/featex_train.ipynb
 notebooks/train.ipynb
 neurocorrelator/mlops-project-462211-9219712b8519.json
 /workspace/neurocorrelator/client_secret_1021463937122_v711ll5aah5advoevq80rgvlhtlt1len_apps.json
-data
+data/
 mlruns/
 notebooks/mlruns
 poetry.lock
@@ -208,5 +208,5 @@ poetry.lock
 .gitignore
 mlops-project-462211-9219712b8519.json
 .gitignore
-checkpoints/geoloc-epoch=00-recall@val_recall_1=0.06.ckpt
+checkpoints/
 legacy_train.py
